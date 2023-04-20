@@ -1,4 +1,3 @@
-// @ts-nocheck
 import Head from "next/head";
 import Link from "next/link";
 import Image from "next/image";
@@ -13,45 +12,70 @@ export default function Home() {
   const [smartContractInput, setSmartContractInput] = useState("");
   const [result, setResult] = useState();
   const [loading, setLoading] = useState<boolean>(false);
-  const [isDisabled, setIsDisabled] = useState<boolean>(true);
+  // const [isDisabled, setIsDisabled] = useState<boolean>(true);
 
-  async function onSubmit(event) {
+  const onSubmit = (event: any) => {
     event.preventDefault();
-    setSmartContractInput("");
+    console.log("submitted!");
+    if (smartContractInput.length < 50) {
+      alert("Please enter a valid smart contract");
+      return;
+    }
+    // setSmartContractInput("");
+    // @ts-ignore
     document.getElementById("result").innerHTML = "";
     setLoading(true);
 
     try {
       console.log("smartContractInput:", smartContractInput);
       // return
-      const response = await fetch("/api/generate", {
+      let response: Response;
+      fetch("/api/generate", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ animal: `${smartContractInput}` }),
-      });
+      })
+        .then((res) => {
+          response = res;
+        })
+        .catch((err) => {
+          console.log("err:", err);
+          setLoading(false);
+          return;
+        });
 
-      const data = await response.json();
+      let data: JSON = JSON.parse("{}");
+      // @ts-ignore
+      response.json().then((jsonData) => {
+        data = jsonData;
+      });
+      // @ts-ignore
       if (response.status !== 200) {
         throw (
+          // @ts-ignore
           data.error ||
+          // @ts-ignore
           new Error(`Request failed with status ${response.status}`)
         );
       }
 
       console.log("data:", data);
-
-      setResult(data.result);
+      // @ts-ignore
+      setResult(data.result || "Something went wrong!");
+      // @ts-ignore
       document.getElementById("result").innerHTML = data.result;
       setSmartContractInput("");
     } catch (error) {
       // Consider implementing your own error handling logic here
+      console.log("Error:");
       console.error(error);
-      alert(error.message);
+      // @ts-ignore
+      alert(error.message || "Something went wrong!");
     }
     setLoading(false);
-  }
+  };
 
   return (
     <>
@@ -77,108 +101,6 @@ export default function Home() {
         >
           Home
         </Link>
-        {/*  <div className={styles.description}>
-          <p>
-            Get started by editing&nbsp;
-            <code className={styles.code}>src/pages/index.tsx</code>
-          </p>
-           <div>
-            <a
-              href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              By{" "}
-              <Image
-                src="/vercel.svg"
-                alt="Vercel Logo"
-                className={styles.vercelLogo}
-                width={100}
-                height={24}
-                priority
-              />
-            </a>
-          </div>
-        </div>
-
-        <div className={styles.center}>
-          <Image
-            className={styles.logo}
-            src="/next.svg"
-            alt="Next.js Logo"
-            width={180}
-            height={37}
-            priority
-          />
-          <div className={styles.thirteen}>
-            <Image
-              src="/thirteen.svg"
-              alt="13"
-              width={40}
-              height={31}
-              priority
-            />
-          </div>
-        </div>
-
-        <div className={styles.grid}>
-          <a
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <h2 className={inter.className}>
-              Docs <span>-&gt;</span>
-            </h2>
-            <p className={inter.className}>
-              Find in-depth information about Next.js features and&nbsp;API.
-            </p>
-          </a>
-
-          <a
-            href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <h2 className={inter.className}>
-              Learn <span>-&gt;</span>
-            </h2>
-            <p className={inter.className}>
-              Learn about Next.js in an interactive course with&nbsp;quizzes!
-            </p>
-          </a>
-
-          <a
-            href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <h2 className={inter.className}>
-              Templates <span>-&gt;</span>
-            </h2>
-            <p className={inter.className}>
-              Discover and deploy boilerplate example Next.js&nbsp;projects.
-            </p>
-          </a>
-
-          <a
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <h2 className={inter.className}>
-              Deploy <span>-&gt;</span>
-            </h2>
-            <p className={inter.className}>
-              Instantly deploy your Next.js site to a shareable URL
-              with&nbsp;Vercel.
-            </p>
-          </a>
-        </div> */}
 
         {/* Our content */}
         <div>
@@ -197,39 +119,36 @@ export default function Home() {
               priority
             />
             <h3>Paste your Smart Contract</h3>
-            <form onSubmit={onSubmit}>
-              <div className="flex flex-col jsutify-center items-center px-8 py-6 my-4">
-                <textarea
-                  id="smartContractText"
-                  type="text"
-                  name="animal"
-                  placeholder="Paste your smart contract here"
-                  value={smartContractInput}
-                  onChange={(e) => setSmartContractInput(e.target.value)}
-                  maxLength={1500}
-                  minLength={50}
-                  required
-                  size={100}
-                  className="px-4 py-2 border border-gray-300 rounded-md min-w-[65vw] min-h-[50vh] my-4"
-                />
-                <button
-                  className={`px-4 py-2 bg-indigo-600 text-white rounded-md my-4 cursor-pointer ${
-                    isDisabled ? "cursor-not-allowed" : ""
-                  }`}
-                  type="submit"
-                  value="Generate Audit Report"
-                  name="Report"
-                  disabled={
-                    loading ||
-                    isDisabled ||
-                    document.getElementById("smartContractText")?.textContent
-                      ?.length < 50
-                  }
-                >
-                  {loading ? "Generating the Report..." : "Generate Report"}
-                </button>
-              </div>
-            </form>
+            {/* <form onSubmit={onSubmit}> */}
+            <div className="flex flex-col jsutify-center items-center px-8 py-6 my-4">
+              <textarea
+                id="smartContractText"
+                name="animal"
+                placeholder="Paste your smart contract here"
+                value={smartContractInput}
+                onChange={(e: any) => setSmartContractInput(e.target.value)}
+                maxLength={1500}
+                minLength={50}
+                required
+                // size={100}
+                className="px-4 py-2 border border-gray-300 rounded-md min-w-[65vw] min-h-[50vh] my-4"
+              />
+              <button
+                className={`px-4 py-2 bg-indigo-600 text-white rounded-md my-4 cursor-pointer ${
+                  loading || smartContractInput.length < 50
+                    ? "opacity-50 cursor-not-allowed"
+                    : ""
+                }`}
+                type="submit"
+                value="Generate Audit Report"
+                name="Report"
+                disabled={loading || smartContractInput.length < 50}
+                onClick={onSubmit}
+              >
+                {loading ? "Generating the Report..." : "Generate Report ⚡"}
+              </button>
+            </div>
+            {/* </form> */}
             <div className={styles.result}>
               <h3>Result</h3>
               <p id="result"></p>

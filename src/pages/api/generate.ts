@@ -87,8 +87,6 @@ export default async function (req, res) {
 // }
 
 function generatePrompt(smartContract) {
-  // const capitalizedAnimal =
-  //   animal[0].toUpperCase() + animal.slice(1).toLowerCase();
   let cPrompt = `For following Smart Contract written in Solidity, find the vulnerabilities and "generate a report in tabular HTML format styled using Tailwindcss". The report should contain the following columns: Vulnerability, Description, Severity, and Remediation. "Return the report as a valid HTML string".`;
   cPrompt += `
   \`\`\`solidity
